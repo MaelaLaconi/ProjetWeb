@@ -10,7 +10,7 @@
 
 	// Ajoute un ingredient
  	function insertIngredient($base,$link,$categorie,$souscategorie,$supercategorie){
- 		$requete = "USE $base;INSERT INTO Ingredient VALUES( $categorie ,$souscategorie,$supercategorie)";
+ 		$requete = "USE $base;INSERT INTO Ingredient VALUES( '$categorie', '$souscategorie', '$supercategorie')";
  		
 		foreach(explode(';',$requete) as $ingredient) {
 			query($link,$ingredient);
@@ -19,9 +19,8 @@
 
 	// Ajoute une recette
  	function insertRecette($base,$link,$id,$titre,$ingredient,$preparation,$index){
-		echo "dans l'insert" ;
- 		$requete = "USE $base;INSERT INTO Recette VALUES( $id,$titre,$ingredient,$preparation,$index)";
- 		$resultat;
+ 		$requete = "USE $base;INSERT INTO Recette VALUES($id,'$titre','$ingredient','$preparation','$index')";
+ 		$resultat; //
 		foreach(explode(';',$requete) as $recette) {
 			$resultat = query($link,$recette);
 		}
@@ -38,6 +37,38 @@
 		return($resultat);
  	}
 
+	function getTabRecetteCateg($base,$link,$categorie){
+		$requete = "USE $base;SELECT * FROM Recette WHERE categorie=$categorie";   //select tout ou pas
+ 		$resultat;
+		$i = 0 ;
+		foreach(explode(';',$requete) as $recette) {
+			$resultat[$i++] = query($link,$recette);
+		}
+
+		return($resultat); 	
+	}
+	
+	// retoune un tableau composé de toute les super categorie
+	function getTabSuperCategorie($base, $link){
+		//----------> ne marche pas
+		$requete = "USE $base;SELECT superCategorie FROM Ingredient";
+ 		$resultat;
+		$i = 0 ;
+		foreach(explode(';',$requete) as $recette) {
+			$resultat[$i++] = query($link,$recette);
+			echo $resultat[$i-1] ;
+		}
+
+		
+		/*
+		$query= mysqli_query($link, "USE $base;SELECT superCategorie FROM Ingredient"); 
+		$row= mysqli_fetch_array($query);
+
+		$res = $row['superCategorie'];
+		return($res); 	*/
+		return $resultat ;
+	}
+	
  	function afficheTableRecette($base,$link){
  		$requete = "USE $base;SELECT * FROM Recette";
  		$resultat;

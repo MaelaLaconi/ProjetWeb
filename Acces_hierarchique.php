@@ -2,99 +2,77 @@
 <?php
     include 'Donnees.inc.php' ;
     include 'InstallBddProjet.php' ;
-	    //require_once('InstallBddProjet.php');
 
 	$mysqli = creerBase();
-    //tableau de recette
-   /* echo "tableau recette : " ;
-    echo "<table border=2>" ;
-    echo "<tr>" ;
-    echo "<td>id</td>" ;
-    echo "<td>titre</td>" ;
-    echo "<td>ingredient</td>" ;
-    echo "<td>preparation</td>" ;
-    echo "<td>index</td>" ;
-    echo "</tr>" ;
+  
+  // retire les caracteres speciaux d'un chaine de caracteres
+  function enleverCaracteresSpeciaux($text) {
+	$utf8 = array(
+	'/[áàâãªä]/u' => 'a',
+	'/[ÁÀÂÃÄ]/u' => 'A',
+	'/[ÍÌÎÏ]/u' => 'I',
+	'/[íìîï]/u' => 'i',
+	'/[éèêë]/u' => 'e',
+	'/[ÉÈÊË]/u' => 'E',
+	'/[óòôõºö]/u' => 'o',
+	'/[ÓÒÔÕÖ]/u' => 'O',
+	'/[úùûü]/u' => 'u',
+	'/[ÚÙÛÜ]/u' => 'U',
+	'/ç/' => 'c',
+	'/Ç/' => 'C',
+	'/ñ/' => 'n',
+	'/;/u' => ' ',
+	'/Ñ/' => 'N'
+	);
+	return preg_replace(array_keys($utf8), array_values($utf8), $text);
+}
+   foreach($Recettes as $clef1 => $clef2){  //clef2 = tab( titre, ing, prep, index[])
+		$tmp=implode(",",$clef2['index']) ;  // on mets tous les elements du tableau dans une string separée par des ,
+		$tmpBon = str_replace("'", " ", $tmp);
+		
+		// on enleve les ' presents
+		$titre = str_replace("'", " ", $clef2['titre']);
+		$ingredients = str_replace("'", " ", $clef2['ingredients']);
+		$prep = str_replace("'", " ", $clef2['preparation']);
+		
+		// on enleve les accents
+		$titreBon = enleverCaracteresSpeciaux($titre) ;
+		$index = enleverCaracteresSpeciaux($tmpBon) ;
+		$ingredientsBon = enleverCaracteresSpeciaux($ingredients) ;
+		$prepBon = enleverCaracteresSpeciaux($prep) ;
 
-    foreach($Recettes as $numero => $titre){  //clef -> valeure
-        echo "<tr>" ;
+		insertRecette("boisson",$mysqli,$clef1,$titreBon,$ingredientsBon,$prepBon,$index);
 
-        echo "<td> premier".$numero."</td>" ;
+   }
+   
+	foreach($Hierarchie as $clef1 => $clef2){  //clef1 = categ clef2 = tab( sousCat[], superCat[])
+		if(count($clef2)==2){
+			$souCat = implode(",",$clef2['sous-categorie']) ;
+			$sousCat2 = str_replace("'", " ", $souCat);
+			$sousCatBon = enleverCaracteresSpeciaux($sousCat2) ;
 
-        foreach($titre as $v1 => $v2){ 
-            if(!is_array($v2)){
-				//insertRecette($base,$mysqli,$numero,$titre,$ingredient,$preparation,$index);
-
-                echo "<td> deuxieme".$v2."</td>" ;
-            }
-            else{
-                $tmp=implode(",",$v2) ;
-                echo "<td> troisieme".$tmp."</td>" ;
-            }
-        }
-        echo "</tr>" ;
-    }
-    echo "</table>" ;*/
-
-	//***********************************
-	/* 0 => 
-  array (
-    'titre' => 'Alerte à Malibu (Boisson de la couleurs des fameux maillots de bains... ou presque)',
-    'ingredients' => '50 cl de malibu coco|50 cl de gloss cerise|1 l de jus de goyave blanche|1 poignée de griottes',
-    'preparation' => 'Mélanger tous les ingrédients ensemble dans un grand pichet. Placer au frais au moins 3 heures avant de déguster. Tchin tchin !!',
-    'index' => 
-    array (
-      0 => 'Malibu',
-      1 => 'Cerise',
-      2 => 'Jus de goyave',
-      3 => 'Cerise griotte',
-    ),
-  ),*/
-	   foreach($Recettes as $clef1 => $clef2){  //clef2 = tab( titre, ing, prep, index[])
-			foreach($clef2['index'] as $clef3 => $clef4){
-				 insertRecette("boisson",$mysqli,$clef1,$clef2['titre'],$clef2['ingredients'],$clef2['preparation'],$clef4);
+			$superCat = implode(",",$clef2['super-categorie']) ;
+		}
+		else{
+			if(count($clef2['super-categorie'])>1){			// tester si categ = aliment -> afficher juste sous-cat
+				$superCat = implode(",",$clef2['super-categorie']) ;
 			}
-	   }
-	
-	$result = afficheRecette($base,$mysqli,$id);
-	//echo $result;
-	
-	while($row = mysqli_fetch_array($result)){
-	    echo $row['id'] . "</br>";
-	    echo $row['titre'] . "</br>";
-	    echo $row['ingredients'] . "</br>";
-	    echo $row['preparation'] . "</br>";
-	    echo $row['listeCategorie'] . "</br>";
-	}
-	//**************************************
-
-    //tableau de hierarchie
-    /*echo "<table border=2>" ;
-    echo "<tr>" ;
-    echo "<td>categorie</td>" ;
-    echo "<td>sous_cat</td>" ;
-    echo "<td>super_cat</td>" ;
-    echo "</tr>" ;
-    foreach($Hierarchie as $cle1 => $cat){  //clef -> valeure
-        echo "<tr>" ;
-
-        echo "<td> premier :".$cle1."</td>" ;
-        foreach($cat as $cle2 => $sous_cat){
-            if(!is_array($sous_cat)){
-                echo "<td>deuxieme :".$sous_cat."</td>" ;
-            }
-            else{
-                $tmp=implode(",",$sous_cat) ;
-                echo "<td> troisieme :".$tmp."</td>" ;
-            }
-          
-        }
-        echo "</tr>" ;
-    }
-    echo "</table>" ;*/
+			else{
+				$superCat = $clef2['super-categorie'][0] ;
+			}
+			$sousCatBon = "NULL" ;
+		}
+		
+		$superCat2 = str_replace("'", " ", $superCat);
+		$superCatBon = enleverCaracteresSpeciaux($superCat2) ;
+		
+		$categorie = enleverCaracteresSpeciaux($clef1) ; 
+		$categorieBon = str_replace("'", " ", $categorie);
+		
+		insertIngredient("boisson",$mysqli,$categorieBon,$sousCatBon,$superCatBon);
+  }
+	//$tab = getTabSuperCategorie("boisson", $mysqli)
 ?>
-
-
 
 
 
@@ -118,6 +96,8 @@
     var tab = new Array() ;
     console.log("Dans la fonction javascript") ;
     <?php 
+		//NE PAS SUPPRIMER
+		//echo '$tab = getTabSuperCategorie("boisson", $mysqli)' ;
     /*foreach($Hierarchie as $cle1 => $cat){  //clef -> valeure
         foreach($cat['super-categorie'] as $cle2 => $sous_cat){
             
