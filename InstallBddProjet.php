@@ -37,89 +37,9 @@
 		return($resultat);
  	}
 
-	//revoie un tableau de recette qui utilise une certaine categorie
-	function getTabRecetteCateg($base,$link,$categorie){
- 		$res = array();
-
-		$query = "SELECT titre FROM Recette WHERE categorie LIKE $categorie";   
-		$result = mysqli_query($link, $query);
-
-		while($row = mysqli_fetch_array($result, MYSQLI_NUM)){
-			array_push($res, $row[0]);
-		}
-		return $res ;
-	}
-	
-	//revoie un tableau de recette qui utilise une certaine sous categorie
-	function getTabRecetteSousCateg($base,$link,$sousCategorie){
- 		$res = array();
-
-		$query = "SELECT titre FROM Recette WHERE sousCategorie LIKE $sousCategorie";   
-		$result = mysqli_query($link, $query);
-
-		while($row = mysqli_fetch_array($result, MYSQLI_NUM)){
-			array_push($res, $row[0]);
-		}
-		return $res ;
-	}
-	
-	
-	//revoie un tableau de recette qui utilise une certaine super categorie
-	function getTabRecetteSuperCateg($base,$link,$superCategorie){
- 		$res = array();
-
-		$query = "SELECT titre FROM Recette WHERE superCategorie LIKE $superCategorie";   
-		$result = mysqli_query($link, $query);
-
-		while($row = mysqli_fetch_array($result, MYSQLI_NUM)){
-			array_push($res, $row[0]);
-		}
-		return $res ;
-	}
-	
-	// retoune un tableau composé de toute les super categorie
-	function getTabSuperCategorie($base, $link){
-		$res = array();
-
-		$query = "SELECT superCategorie FROM Ingredient";
-		$result = mysqli_query($link, $query);
-
-		/* Tableau numérique */
-		while($row = mysqli_fetch_array($result, MYSQLI_NUM)){
-			array_push($res, $row[0]);
-		}
-		return $res ;
-	}
-	
-	// retoune un tableau composé de toute les  categories
-	function getTabCategorie($base, $link, $aliment){
-		$res = array();
-
-		$query = "SELECT categorie FROM Ingredient WHERE superCategorie LIKE '$aliment'";
-		$result = mysqli_query($link, $query);
-
-		/* Tableau numérique */
-		while($row = mysqli_fetch_array($result, MYSQLI_NUM)){
-			array_push($res, $row[0]);
-		}
-		return $res ;
-	}
-	
-	// retoune un tableau composé de toute les sous categories
-	function getTabSousCategorie($base, $link, $aliment){
-		$res = array();
-
-		$query = "SELECT sousCategorie FROM Ingredient WHERE categorie LIKE $aliment";
-		$result = mysqli_query($link, $query);
-
-		/* Tableau numérique */
-		while($row = mysqli_fetch_array($result, MYSQLI_NUM)){
-			array_push($res, $row[0]);
-		}
-		return $res ;
-	}
-	
-	
+	function getTabRecette($base,$link,$id){
+ 		// a faire
+ 	}
  	function afficheTableRecette($base,$link){
  		$requete = "USE $base;SELECT * FROM Recette";
  		$resultat;
@@ -141,7 +61,8 @@
 	 CREATE DATABASE $base;
 	 USE $base;
 	 CREATE TABLE Recette (id INT PRIMARY KEY, titre VARCHAR(500),ingredients VARCHAR(500), preparation VARCHAR(500),listeCategorie VARCHAR(500));
-	 CREATE TABLE Ingredient (categorie VARCHAR(50) PRIMARY KEY,sousCategorie VARCHAR(50),superCategorie VARCHAR(50) NOT NULL)";
+	 CREATE TABLE Ingredient (categorie VARCHAR(50) PRIMARY KEY,sousCategorie VARCHAR(50),superCategorie VARCHAR(50) NOT NULL);
+	 CREATE TABLE Compte (login VARCHAR(20) PRIMARY KEY,password VARCHAR(20), nom VARCHAR(20), prenom VARCHAR(20) , anniversaire VARCHAR(20) , sexe VARCHAR(1) , mail VARCHAR(20) ,telephone VARCHAR(10) )";
 
 
 
