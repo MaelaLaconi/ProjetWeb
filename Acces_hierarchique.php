@@ -70,12 +70,10 @@
 		$categorieBon = str_replace("'", " ", $categorie);
 		
 		insertIngredient("boisson",$mysqli,$categorieBon,$sousCatBon,$superCatBon);
-  }
-	//$tab = getTabSuperCategorie("boisson", $mysqli)
+	}
+	$tabSuper = getTabSuperCategorie("boisson", $mysqli) ;
+	
 ?>
-
-
-
 
 
 
@@ -96,50 +94,52 @@
     var tab = new Array() ;
     console.log("Dans la fonction javascript") ;
     <?php 
-		//NE PAS SUPPRIMER
-		//echo '$tab = getTabSuperCategorie("boisson", $mysqli)' ;
-    /*foreach($Hierarchie as $cle1 => $cat){  //clef -> valeure
-        foreach($cat['super-categorie'] as $cle2 => $sous_cat){
-            
-            if(!is_array($sous_cat)){
-					echo 'tab.push("'.$sous_cat.'");';
+		
+		foreach($tabSuper as $cle1 => $clef2){  
 				
-            }
-            else{
-                foreach($sous_cat as $clef3 => $clef4){
-
-						echo 'tab.push("'.$clef4.'");';
-					
-                }
-            }
-        }
-    }*/
+			if($clef2){   //teste si la chaine n'est pas null
+				echo 'tab.push("'.$clef2.'");';
+			}
+		}
    ?>;
    
-    str="<select name='aliments' onChange='choixCateg()'>" ;
+    str="<select name='aliments' onChange='choixCateg(this.value); recetteSuperCategorie(this.value)'>" ;
     for(var i = 0 ; i < tab.length ; i++){
             str += "<option value='"+tab[i]+"'>"+tab[i]+" </option>" ;
     }
     str +="</select>" ;
     document.write(str) ;
         
+	//utiliser ajax pour passer l'aliment donner dans choixCateg au php	
+	/*$.ajax({
+			type: 'POST',
+			url: 'insert.php',                
+			data: {idCateg:idCateg},
+			success: function(data) {
+
+			}  
+		});*/
+		
     // Creation de la liste 2 : categorie
-    function choixCateg(){
-       // var idCateg = document.formulaire.aliments.value ; //recup l'aliment selectionne
-        //window.location.href=”index.php?idCateg = document.formulaire.aliments.value";
+    function choixCateg(aliment){ //aliment est la super categorie
         var tmp ="";
         var tabCateg = new Array() ;
-        
+        var idCateg = document.formulaire.aliments.value ; //recup l'aliment selectionne
+		console.log(idCateg)  ;
+		
         <?php 
-            //$categ = $_GET["idCateg"]; //puts the uid varialbe into $somevar
+			if (isset($_GET['idCateg'])){
+				$categ = $_GET['idCateg']; 
+			}
+			$tabCat = getTabCategorie("boisson", $mysqli, $categ)  ;  //$categ doit etre recup du js
+			
             $tabTmp = array() ;
-            foreach($Hierarchie as $cle1 => $cat){  //clef -> valeure
-                    echo 'tabCateg.push("'.$cle1.'");';
-                    console.log("Dans le for") ;
+            foreach($tabCat as $cle1 => $clef2){  //clef -> valeure
+                    echo 'tabCateg.push("'.$clef2.'");';
 			}
         ?>
         
-        tmp="<select name='categ' onChange='choixSousCateg()'>" ;
+        tmp="<select name='categ' onChange='choixSousCateg(this.value); recetteCategorie(this.value)'>" ;
         for(var i = 0 ; i < tabCateg.length ; i++){
             tmp += "<option>"+tabCateg[i]+"</option>" ;
         }
@@ -148,56 +148,93 @@
     }
     
     
+    
     // Creation de la liste 3 : sous_categorie
-    function choixSousCateg(){
+    function choixSousCateg(aliment){  //aliment est categorie
     console.log("Dans la sous categorie") ;
 
-    // var idCateg = document.formulaire.aliments.value ; //recup l'aliment selectionne
-    //window.location.href=”index.php?idCateg = document.formulaire.aliments.value";
     var tmp ="";
     var tabCateg = new Array() ;
     
     <?php 
-        //$categ = $_GET["idCateg"]; //puts the uid varialbe into $somevar
+        /*$categ = $_GET["aliment"];
+		$tabCat = getTabSousCategorie("boisson", $mysqli, $categ)  ;
+
         $tabTmp = array() ;
-        foreach($Hierarchie as $cle1 => $cat){  //clef -> valeure
-                echo 'tabCateg.push("'.$cle1.'");';
-                console.log("Dans le for") ;
-        }
+        foreach($tabCat as $cle1 => $clef2){  //clef -> valeure
+                echo 'tabCateg.push("'.$clef2.'");';
+        }*/
     ?>
     
-    tmp="<select name='sousCateg' onChange='recetteAssociee(this.value)'>" ;
+    tmp="<select name='sousCateg' onChange='recetteSousCategorie(this.value)'>" ;
     for(var i = 0 ; i < tabCateg.length ; i++){
         tmp += "<option>"+tabCateg[i]+"</option>" ;
     }
     tmp += "</select>" ;
     document.getElementById('div_sousCateg').innerHTML = tmp ;
     }
-    
-
-    function recetteAssociee(nom){
-    console.log("Dans les recettes associée avec nom = "+nom) ;
-    var tmp ="";
-    var tabRecette = new Array() ;
-    <?php
-        $tabTmp = array() ;
-            foreach($Recettes as $cle1 => $cat){  //clef -> valeure
-                foreach($cat['index'] as $clef2 => $clef3){
-                    echo 'tabRecette.push("'.$cat['titre'].'");';
-                }
-        }
-    ?>
-    
-    tmp="<select name='recette'>" ;
-    for(var i = 0 ; i < tabRecette.length ; i++){
-        if (tabRecette[i] == nom){
-            tmp += "<option>"+tabRecette[i]+"</option>" ;
-        }
-    }
-    tmp += "</select>" ;
-    document.getElementById('div_recette').innerHTML = tmp ;
-    
-    }
+	
+	function recetteSousCategorie(sousCat){
+		 var tmp ="";
+		var tabRecette = new Array() ;
+		<?php
+			//$tab = getTabRecetteSousCateg("boisson", $mysqli, sousCat) ;
+			$tabTmp = array() ;
+				/*foreach($tab as $cle1 => $cat){  //clef -> valeure
+					echo 'tabRecette.push("'.$cat.'");';
+					
+				}*/
+		?>
+		
+		tmp="<select name='recette'>" ;
+		for(var i = 0 ; i < tabRecette.length ; i++){
+			if (tabRecette[i] == nom){
+				tmp += "<option>"+tabRecette[i]+"</option>" ;
+			}
+		}
+		tmp += "</select>" ;
+		document.getElementById('div_recette').innerHTML = tmp ;
+	}
+	
+	function recetteSuperCategorie(superCat){
+		 var tmp ="";
+		var tabRecette = new Array() ;
+		<?php
+			//$tab = getTabRecetteSuperCateg("boisson", $mysqli, superCat) ;
+			$tabTmp = array() ;
+				/*foreach($tab as $cle1 => $cat){  //clef -> valeure
+					echo 'tabRecette.push("'.$cat.'");';
+				}*/
+		?>
+		
+		tmp="<select name='recette'>" ;
+		for(var i = 0 ; i < tabRecette.length ; i++){
+			if (tabRecette[i] == nom){
+				tmp += "<option>"+tabRecette[i]+"</option>" ;
+			}
+		}
+		tmp += "</select>" ;
+		document.getElementById('div_recette').innerHTML = tmp ;
+	}
+	
+	function recetteCategorie(categ){
+		 var tmp ="";
+		var tabRecette = new Array() ;
+		<?php
+			//$tab = getTabRecetteCateg("boisson", $mysqli, categ) ;
+			$tabTmp = array() ;
+				echo 'tabRecette.push("'.$cat.'");';
+		?>
+		
+		tmp="<select name='recette'>" ;
+		for(var i = 0 ; i < tabRecette.length ; i++){
+			if (tabRecette[i] == nom){
+				tmp += "<option>"+tabRecette[i]+"</option>" ;
+			}
+		}
+		tmp += "</select>" ;
+		document.getElementById('div_recette').innerHTML = tmp ;
+	}
     
 </script>
 
