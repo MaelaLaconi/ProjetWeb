@@ -1,11 +1,15 @@
 
 <?php
+	ini_set('max_execution_time', 300); //300 seconds = 5 minutes
+	set_time_limit(300);
+
+
     include 'Donnees.inc.php' ;
     include 'InstallBddProjet.php' ;
-
+	include 'insert.php' ;
 	$mysqli = creerBase();
-  
-  // retire les caracteres speciaux d'un chaine de caracteres
+
+	// retire les caracteres speciaux d'un chaine de caracteres
   function enleverCaracteresSpeciaux($text) {
 	$utf8 = array(
 	'/[áàâãªä]/u' => 'a',
@@ -88,63 +92,62 @@
 <body>
 <form name="formulaire"> 
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <script>
+
     // Creation de la liste 1 : super_categorie
     var str ="";
     var tab = new Array() ;
     console.log("Dans la fonction javascript") ;
     <?php 
-		
 		foreach($tabSuper as $cle1 => $clef2){  
-				
 			if($clef2){   //teste si la chaine n'est pas null
 				echo 'tab.push("'.$clef2.'");';
 			}
 		}
    ?>;
-   
     str="<select name='aliments' onChange='choixCateg(this.value); recetteSuperCategorie(this.value)'>" ;
     for(var i = 0 ; i < tab.length ; i++){
             str += "<option value='"+tab[i]+"'>"+tab[i]+" </option>" ;
     }
     str +="</select>" ;
     document.write(str) ;
-        
-	//utiliser ajax pour passer l'aliment donner dans choixCateg au php	
-	/*$.ajax({
-			type: 'POST',
-			url: 'insert.php',                
-			data: {idCateg:idCateg},
-			success: function(data) {
-
-			}  
-		});*/
-		
+     
     // Creation de la liste 2 : categorie
     function choixCateg(aliment){ //aliment est la super categorie
-        var tmp ="";
-        var tabCateg = new Array() ;
-        var idCateg = document.formulaire.aliments.value ; //recup l'aliment selectionne
-		console.log(idCateg)  ;
+        var idCateg = document.formulaire.aliments.value ; //recup l'aliment selectionne		
+		//utiliser ajax pour passer l'aliment donner dans choixCateg au php	
+		$.ajax({
+			url: "insert.php",    
+			method: "get",	
+			data : idCateg,
+			success: function(res) {
+				console.log(res);
+			}
+		});
 		
-        <?php 
-			if (isset($_GET['idCateg'])){
-				$categ = $_GET['idCateg']; 
+		//ce qu'il faut faire en recuperant la var js dans le php 
+		/*var tmp ="";
+		var tabCateg = new Array() ;
+		<?php 
+			include 'insert.php' ;  //include pour recup la var js dans php
+			echo $arrayTmp[0] ;   //var dans insert.php
+			$tabCat = getTabCategorie("boisson", $mysqli, $arrayTmp[0])  ; 
+			$tabTmp = array() ;
+			foreach($tabCat as $cle1 => $clef2){  
+					echo 'tabCateg.push("'.$clef2.'");';
 			}
-			$tabCat = getTabCategorie("boisson", $mysqli, $categ)  ;  //$categ doit etre recup du js
-			
-            $tabTmp = array() ;
-            foreach($tabCat as $cle1 => $clef2){  //clef -> valeure
-                    echo 'tabCateg.push("'.$clef2.'");';
-			}
-        ?>
+		?>
+
+		tmp="<select name='categ' onChange='choixSousCateg(this.value); recetteCategorie(this.value)'>" ;
+		for(var i = 0 ; i < tabCateg.length ; i++){
+			tmp += "<option>"+tabCateg[i]+"</option>" ;
+		}
+		
+		
+		tmp += "</select>" ;
+		document.getElementById('div_categ').innerHTML = tmp ;*/
         
-        tmp="<select name='categ' onChange='choixSousCateg(this.value); recetteCategorie(this.value)'>" ;
-        for(var i = 0 ; i < tabCateg.length ; i++){
-            tmp += "<option>"+tabCateg[i]+"</option>" ;
-        }
-        tmp += "</select>" ;
-        document.getElementById('div_categ').innerHTML = tmp ;
     }
     
     

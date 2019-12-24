@@ -86,7 +86,9 @@
 
 		/* Tableau numérique */
 		while($row = mysqli_fetch_array($result, MYSQLI_NUM)){
-			array_push($res, $row[0]);
+			if(!in_array($row[0], $res)){  //teste si la valeur n'est pas deja contenue dans le tableau
+				array_push($res, $row[0]);
+			}
 		}
 		return $res ;
 	}
@@ -94,7 +96,7 @@
 	// retoune un tableau composé de toute les  categories
 	function getTabCategorie($base, $link, $aliment){
 		$res = array();
-
+		//echo "l'aliment passé est :".$aliment."fin" ;
 		$query = "SELECT categorie FROM Ingredient WHERE superCategorie LIKE '$aliment'";
 		$result = mysqli_query($link, $query);
 
